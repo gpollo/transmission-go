@@ -52,13 +52,8 @@ func postRequest(payload []byte) ([]byte, error) {
 	return body, nil
 }
 
-func sendRequest(m Method, req interface{}) ([]byte, error) {
-	content := Request{
-		Method:    m.String(),
-		Arguments: req,
-	}
-
-	parameters, err := json.Marshal(content)
+func sendRequest(req interface{}) ([]byte, error) {
+	parameters, err := json.Marshal(req)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -75,16 +70,16 @@ func sendRequest(m Method, req interface{}) ([]byte, error) {
 }
 
 func ListTorrents(fields []string) error {
-	request := TorrentGetRequest{
-		Fields: fields,
-	}
-	response := TorrentGetResponse{}
+	request := TorrentGetRequest{}
+	request.Method = TorrentGet.String()
+	request.Arguments.Fields = fields
 
-	bytes, err := sendRequest(TorrentGet, request)
+	bytes, err := sendRequest(request)
 	if err != nil {
 		return err
 	}
 
+	response := TorrentGetResponse{}
 	if err := json.Unmarshal(bytes, &response); err != nil {
 		return err
 	}

@@ -61,8 +61,11 @@ func (t *Torrent) fieldToString(field string) string {
 }
 
 type TorrentGetRequest struct {
-	IDs    []int    `json:"ids,omitempty"`
-	Fields []string `json:"fields"`
+	Method    string `json:"method"`
+	Arguments struct {
+		IDs    []int    `json:"ids,omitempty"`
+		Fields []string `json:"fields"`
+	} `json:"arguments"`
 }
 
 type TorrentGetResponse struct {
