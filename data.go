@@ -42,7 +42,26 @@ type Peer struct {
 	RateToPeer         int     `json:"rateToPeer,omitempty"`
 }
 
+type File struct {
+	BytesCompleted int    `json:"bytesCompleted,omitempty"`
+	Length         int    `json:"length,omitempty"`
+	Name           string `json:"name,omitempty"`
+}
+
+func (f *File) fieldToString(field string) string {
+	if field == "bytesCompleted" {
+		return strconv.Itoa(f.BytesCompleted)
+	} else if field == "length" {
+		return strconv.Itoa(f.Length)
+	} else if field == "name" {
+		return string(f.Name)
+	}
+
+	return ""
+}
+
 type Torrent struct {
+	Files []File `json:"files,omitempty"`
 	ID    int    `json:"id,omitempty"`
 	Name  string `json:"name,omitempty"`
 	Peers []Peer `json:"peers,omitempty"`
