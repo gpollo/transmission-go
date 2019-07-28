@@ -57,7 +57,7 @@ func (f *File) fieldToString(field string) string {
 		return string(f.Name)
 	}
 
-	return ""
+	return "..."
 }
 
 type Torrent struct {
@@ -72,11 +72,9 @@ func (t *Torrent) fieldToString(field string) string {
 		return strconv.Itoa(t.ID)
 	} else if field == "name" {
 		return string(t.Name)
-	} else if field == "peers" {
-		return ""
 	}
 
-	return ""
+	return "..."
 }
 
 type TorrentGetRequest struct {
