@@ -1,7 +1,6 @@
 package main
 
 import "net/http"
-import "fmt"
 import "encoding/json"
 import "github.com/olekukonko/tablewriter"
 import "io/ioutil"
@@ -111,7 +110,42 @@ func ListTorrents(fields []string) error {
 	return nil
 }
 
-func ListFiles(id int) {
+func ListFiles(id int, fields []string) error {
+	request := TorrentGetRequest{}
+	request.Method = TorrentGet.String()
+	request.Arguments.IDs = []int{id}
+	request.Arguments.Fields = []string{"files"}
 
-	fmt.Println(id)
+	bytes, err := sendRequest(request)
+	if err != nil {
+		return err
+	}
+
+	response := TorrentGetResponse{}
+	if err := json.Unmarshal(bytes, &response); err != nil {
+		return err
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(fields)
+	table.SetBorders(tablewriter.Border{
+		Left:   true,
+		Top:    true,
+		Right:  false,
+		Bottom: false,
+	})
+	table.SetCenterSeparator("-")
+	table.SetColWidth(200)
+
+	torrent := response.Arguments.Torrents[0]
+	for _, file := range torrent.Files {
+		row := []string{}
+		for _, field := range fields {
+			row = append(row, file.fieldToString(field))
+		}
+		table.Append(row)
+	}
+	table.Render()
+
+	return nil
 }

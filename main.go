@@ -54,6 +54,15 @@ func main() {
 		},
 	)
 
+	cmdListFilesFields := cmdListFiles.List(
+		"f",
+		"field",
+		&argparse.Options{
+			Required: false,
+			Help:     "The list of fields to show",
+		},
+	)
+
 	if err := parser.Parse(os.Args); err != nil {
 		fmt.Print(parser.Usage(err))
 	}
@@ -72,7 +81,11 @@ func main() {
 	}
 
 	if cmdListFiles.Happened() {
-		ListFiles(*cmdListFilesID)
+		err := ListFiles(*cmdListFilesID, *cmdListFilesFields)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 		return
 	}
 
