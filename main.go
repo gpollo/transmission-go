@@ -63,7 +63,8 @@ func main() {
 	}
 
 	if cmdListTorrents.Happened() {
-		if err := ListTorrents(*cmdListTorrentsFields); err != nil {
+		err := ListTorrents(*cmdListTorrentsFields)
+		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
