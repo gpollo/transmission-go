@@ -49,6 +49,10 @@ func postRequest(payload []byte) ([]byte, error) {
 		return []byte{}, errors.New("Invalid Session ID")
 	}
 
+	if response.StatusCode != 200 {
+		return []byte{}, errors.New(string(body))
+	}
+
 	return body, nil
 }
 
