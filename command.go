@@ -13,17 +13,18 @@ const (
 	SessionIDRegex string = "<code>X-Transmission-Session-Id: *(.*)</code>"
 )
 
-var sessionID string = ""
+type Client struct {
+	Endpoint  string
+	SessionID string
+}
 
-//var rpcURL string = ""
-
-func postRequest(payload []byte) ([]byte, error) {
-	request, err := http.NewRequest("POST", rpcURL, bytes.NewBuffer(payload))
+func (c *Client) postRequest(payload []byte) ([]byte, error) {
+	request, err := http.NewRequest("POST", c.Endpoint, bytes.NewBuffer(payload))
 	if err != nil {
 		return []byte{}, err
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-Transmission-Session-Id", sessionID)
+	request.Header.Set("X-Transmission-Session-Id", c.SessionID)
 
 	client := &http.Client{}
 	response, err := client.Do(request)
@@ -42,7 +43,7 @@ func postRequest(payload []byte) ([]byte, error) {
 
 		matches := regex.FindStringSubmatch(string(body))
 		if len(matches) == 2 {
-			sessionID = matches[1]
+			c.SessionID = matches[1]
 		}
 
 		return []byte{}, errors.New("Invalid Session ID")
@@ -55,15 +56,15 @@ func postRequest(payload []byte) ([]byte, error) {
 	return body, nil
 }
 
-func sendRequest(req interface{}) ([]byte, error) {
+func (c *Client) sendRequest(req interface{}) ([]byte, error) {
 	parameters, err := json.Marshal(req)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	bytes, err := postRequest(parameters)
+	bytes, err := c.postRequest(parameters)
 	if err != nil {
-		bytes, err = postRequest(parameters)
+		bytes, err = c.postRequest(parameters)
 		if err != nil {
 			return []byte{}, err
 		}
@@ -72,12 +73,12 @@ func sendRequest(req interface{}) ([]byte, error) {
 	return bytes, nil
 }
 
-func ListTorrents(fields []string) error {
+func (c *Client) ListTorrents(fields []string) error {
 	request := TorrentGetRequest{}
 	request.Method = TorrentGet.String()
 	request.Arguments.Fields = fields
 
-	bytes, err := sendRequest(request)
+	bytes, err := c.sendRequest(request)
 	if err != nil {
 		return err
 	}
@@ -110,13 +111,13 @@ func ListTorrents(fields []string) error {
 	return nil
 }
 
-func ListFiles(id int, fields []string) error {
+func (c *Client) ListFiles(id int, fields []string) error {
 	request := TorrentGetRequest{}
 	request.Method = TorrentGet.String()
 	request.Arguments.IDs = []int{id}
 	request.Arguments.Fields = []string{"files"}
 
-	bytes, err := sendRequest(request)
+	bytes, err := c.sendRequest(request)
 	if err != nil {
 		return err
 	}

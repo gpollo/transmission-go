@@ -4,12 +4,7 @@ import "fmt"
 import "path"
 import "os"
 
-//import "encoding/json"
 import "github.com/akamensky/argparse"
-
-//import "net/http"
-
-var rpcURL = "http://192.168.0.108:9091/transmission/rpc"
 
 func main() {
 	parser := argparse.NewParser(
@@ -71,8 +66,12 @@ func main() {
 
 	}
 
+	client := Client{
+		Endpoint: "http://192.168.0.108:9091/transmission/rpc",
+	}
+
 	if cmdListTorrents.Happened() {
-		err := ListTorrents(*cmdListTorrentsFields)
+		err := client.ListTorrents(*cmdListTorrentsFields)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -81,7 +80,7 @@ func main() {
 	}
 
 	if cmdListFiles.Happened() {
-		err := ListFiles(*cmdListFilesID, *cmdListFilesFields)
+		err := client.ListFiles(*cmdListFilesID, *cmdListFilesFields)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
