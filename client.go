@@ -77,6 +77,8 @@ func (c *Client) sendRequest(req interface{}) ([]byte, error) {
 	return bytes, nil
 }
 
+/* RPC calls */
+
 func (c *Client) TorrentGet(ids []int, fields []string) (TorrentGetResponse, error) {
 	request := TorrentGetRequest{}
 	request.Method = TorrentGet.String()
@@ -114,4 +116,19 @@ func (c *Client) TorrentRenamePath(id int, old string, new string) error {
 	}
 
 	return nil
+}
+
+/* extra calls */
+
+func (c *Client) GetTorrentStringParam(id int, param string) (string, error) {
+	response, err := c.TorrentGet([]int{id}, []string{param})
+	if err != nil {
+		return "", err
+	}
+
+	if len(response.Arguments.Torrents) != 1 {
+		return "", errors.New("Unexpected number of torrent received")
+	}
+
+	return response.Arguments.Torrents[0].fieldToString(param), nil
 }

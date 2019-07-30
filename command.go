@@ -3,7 +3,6 @@ package main
 import "github.com/olekukonko/tablewriter"
 import "os"
 import "strings"
-import "errors"
 
 type Commands struct {
 	Client   Client
@@ -60,19 +59,6 @@ func (c *Commands) ListTorrents(fields []string) error {
 	return nil
 }
 
-func (c *Client) GetTorrentParam(id int, param string) (string, error) {
-	response, err := c.TorrentGet([]int{id}, []string{param})
-	if err != nil {
-		return "", err
-	}
-
-	if len(response.Arguments.Torrents) != 1 {
-		return "", errors.New("Unexpected number of torrent received")
-	}
-
-	return response.Arguments.Torrents[0].fieldToString(param), nil
-}
-
 func (c *Commands) ListFiles(id int, fields []string) error {
 	fields = setAsFirstString(fields, "name")
 
@@ -81,7 +67,7 @@ func (c *Commands) ListFiles(id int, fields []string) error {
 		return err
 	}
 
-	name, err := c.Client.GetTorrentParam(id, "name")
+	name, err := c.Client.GetTorrentStringParam(id, "name")
 	if err != nil {
 		return err
 	}
@@ -130,7 +116,7 @@ func (c *Commands) ListPeers(id int, fields []string) error {
 }
 
 func (c *Commands) RenameTorrent(id int, new string) error {
-	old, err := c.Client.GetTorrentParam(id, "name")
+	old, err := c.Client.GetTorrentStringParam(id, "name")
 	if err != nil {
 		return err
 	}
@@ -143,7 +129,7 @@ func (c *Commands) RenameTorrent(id int, new string) error {
 }
 
 func (c *Commands) RenameFile(id int, src string, dest string) error {
-	name, err := c.Client.GetTorrentParam(id, "name")
+	name, err := c.Client.GetTorrentStringParam(id, "name")
 	if err != nil {
 		return err
 	}
