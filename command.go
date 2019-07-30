@@ -1,86 +1,9 @@
 package main
 
-import "net/http"
-import "encoding/json"
 import "github.com/olekukonko/tablewriter"
-import "io/ioutil"
-import "bytes"
-import "errors"
 import "os"
-import "regexp"
 import "strings"
-
-const (
-	SessionIDRegex string = "<code>X-Transmission-Session-Id: *(.*)</code>"
-)
-
-type Client struct {
-	Endpoint  string
-	SessionID string
-	NoHeader  bool
-}
-
-func CreateClient() Client {
-	client := Client{}
-	client.NoHeader = false
-
-	return client
-}
-
-func (c *Client) postRequest(payload []byte) ([]byte, error) {
-	request, err := http.NewRequest("POST", c.Endpoint, bytes.NewBuffer(payload))
-	if err != nil {
-		return []byte{}, err
-	}
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-Transmission-Session-Id", c.SessionID)
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		return []byte{}, err
-	}
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	if response.StatusCode == 409 {
-		regex := regexp.MustCompile(SessionIDRegex)
-
-		matches := regex.FindStringSubmatch(string(body))
-		if len(matches) == 2 {
-			c.SessionID = matches[1]
-		}
-
-		return []byte{}, errors.New("Invalid Session ID")
-	}
-
-	if response.StatusCode != 200 {
-		return []byte{}, errors.New(string(body))
-	}
-
-	return body, nil
-}
-
-func (c *Client) sendRequest(req interface{}) ([]byte, error) {
-	parameters, err := json.Marshal(req)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	bytes, err := c.postRequest(parameters)
-	if err != nil {
-		bytes, err = c.postRequest(parameters)
-		if err != nil {
-			return []byte{}, err
-		}
-	}
-
-	return bytes, nil
-}
+import "errors"
 
 func (c *Client) printTable(header []string, content [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
@@ -106,17 +29,8 @@ func (c *Client) ListTorrents(fields []string) error {
 	fields = setAsFirstString(fields, "name")
 	fields = setAsFirstString(fields, "id")
 
-	request := TorrentGetRequest{}
-	request.Method = TorrentGet.String()
-	request.Arguments.Fields = fields
-
-	bytes, err := c.sendRequest(request)
+	response, err := c.TorrentGet([]int{}, fields)
 	if err != nil {
-		return err
-	}
-
-	response := TorrentGetResponse{}
-	if err := json.Unmarshal(bytes, &response); err != nil {
 		return err
 	}
 
@@ -134,18 +48,8 @@ func (c *Client) ListTorrents(fields []string) error {
 }
 
 func (c *Client) GetTorrentParam(id int, param string) (string, error) {
-	request := TorrentGetRequest{}
-	request.Method = TorrentGet.String()
-	request.Arguments.IDs = []int{id}
-	request.Arguments.Fields = []string{param}
-
-	bytes, err := c.sendRequest(request)
+	response, err := c.TorrentGet([]int{id}, []string{param})
 	if err != nil {
-		return "", err
-	}
-
-	response := TorrentGetResponse{}
-	if err := json.Unmarshal(bytes, &response); err != nil {
 		return "", err
 	}
 
@@ -159,18 +63,8 @@ func (c *Client) GetTorrentParam(id int, param string) (string, error) {
 func (c *Client) ListFiles(id int, fields []string) error {
 	fields = setAsFirstString(fields, "name")
 
-	request := TorrentGetRequest{}
-	request.Method = TorrentGet.String()
-	request.Arguments.IDs = []int{id}
-	request.Arguments.Fields = []string{"files"}
-
-	bytes, err := c.sendRequest(request)
+	response, err := c.TorrentGet([]int{}, []string{"files"})
 	if err != nil {
-		return err
-	}
-
-	response := TorrentGetResponse{}
-	if err := json.Unmarshal(bytes, &response); err != nil {
 		return err
 	}
 
@@ -206,19 +100,7 @@ func (c *Client) RenameTorrent(id int, new string) error {
 		return err
 	}
 
-	request := TorrentRenamePathRequest{}
-	request.Method = TorrentRenamePath.String()
-	request.Arguments.ID = id
-	request.Arguments.Path = old
-	request.Arguments.Name = new
-
-	bytes, err := c.sendRequest(request)
-	if err != nil {
-		return err
-	}
-
-	response := TorrentRenamePathResponse{}
-	if err := json.Unmarshal(bytes, &response); err != nil {
+	if err := c.TorrentRenamePath(id, old, new); err != nil {
 		return err
 	}
 
@@ -231,19 +113,7 @@ func (c *Client) RenameFile(id int, src string, dest string) error {
 		return err
 	}
 
-	request := TorrentRenamePathRequest{}
-	request.Method = TorrentRenamePath.String()
-	request.Arguments.ID = id
-	request.Arguments.Path = name + "/" + src
-	request.Arguments.Name = dest
-
-	bytes, err := c.sendRequest(request)
-	if err != nil {
-		return err
-	}
-
-	response := TorrentRenamePathResponse{}
-	if err := json.Unmarshal(bytes, &response); err != nil {
+	if err := c.TorrentRenamePath(id, name+"/"+src, dest); err != nil {
 		return err
 	}
 
