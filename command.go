@@ -74,6 +74,22 @@ func (c *Client) sendRequest(req interface{}) ([]byte, error) {
 	return bytes, nil
 }
 
+func (c *Client) printTable(header []string, content [][]string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(header)
+	table.SetBorders(tablewriter.Border{
+		Left:   false,
+		Top:    false,
+		Right:  false,
+		Bottom: false,
+	})
+	table.SetColumnSeparator("")
+	table.SetCenterSeparator("-")
+	table.SetColWidth(100)
+	table.AppendBulk(content)
+	table.Render()
+}
+
 func (c *Client) ListTorrents(fields []string) error {
 	fields = setAsFirstString(fields, "name")
 	fields = setAsFirstString(fields, "id")
@@ -92,25 +108,15 @@ func (c *Client) ListTorrents(fields []string) error {
 		return err
 	}
 
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(fields)
-	table.SetBorders(tablewriter.Border{
-		Left:   false,
-		Top:    false,
-		Right:  false,
-		Bottom: false,
-	})
-	table.SetCenterSeparator("-")
-	table.SetColWidth(100)
-
+	content := [][]string{}
 	for _, torrent := range response.Arguments.Torrents {
 		row := []string{}
 		for _, field := range fields {
 			row = append(row, torrent.fieldToString(field))
 		}
-		table.Append(row)
+		content = append(content, row)
 	}
-	table.Render()
+	c.printTable(fields, content)
 
 	return nil
 }
@@ -162,17 +168,7 @@ func (c *Client) ListFiles(id int, fields []string) error {
 	}
 	name = name + "/"
 
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(fields)
-	table.SetBorders(tablewriter.Border{
-		Left:   true,
-		Top:    true,
-		Right:  false,
-		Bottom: false,
-	})
-	table.SetCenterSeparator("-")
-	table.SetColWidth(200)
-
+	content := [][]string{}
 	torrent := response.Arguments.Torrents[0]
 	for _, file := range torrent.Files {
 		row := []string{}
@@ -185,9 +181,9 @@ func (c *Client) ListFiles(id int, fields []string) error {
 				row = append(row, file.fieldToString(field))
 			}
 		}
-		table.Append(row)
+		content = append(content, row)
 	}
-	table.Render()
+	c.printTable(fields, content)
 
 	return nil
 }
