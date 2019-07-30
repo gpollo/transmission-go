@@ -16,15 +16,6 @@ func (c Method) String() string {
 	}[c]
 }
 
-type Request struct {
-	Method    string      `json:"method"`
-	Arguments interface{} `json:"arguments"`
-}
-
-type Response struct {
-	Arguments interface{} `json:"arguments"`
-}
-
 type Peer struct {
 	Address            string  `json:"address,omitempty"`
 	ClientName         string  `json:"clientName,omitempty"`
