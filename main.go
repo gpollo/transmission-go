@@ -16,7 +16,7 @@ func main() {
 		"Command line interface for transmission RPC",
 	)
 
-	cmdEndpoint := parser.String(
+	argEndpoint := parser.String(
 		"e",
 		"endpoint",
 		&argparse.Options{
@@ -114,8 +114,8 @@ func main() {
 		client.Endpoint = envEndpoint
 	}
 
-	if *cmdEndpoint != "" {
-		client.Endpoint = *cmdEndpoint
+	if *argEndpoint != "" {
+		client.Endpoint = *argEndpoint
 	}
 
 	if cmdListTorrents.Happened() {
