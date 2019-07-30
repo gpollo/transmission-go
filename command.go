@@ -74,6 +74,9 @@ func (c *Client) sendRequest(req interface{}) ([]byte, error) {
 }
 
 func (c *Client) ListTorrents(fields []string) error {
+	fields = setAsFirstString(fields, "name")
+	fields = setAsFirstString(fields, "id")
+
 	request := TorrentGetRequest{}
 	request.Method = TorrentGet.String()
 	request.Arguments.Fields = fields
@@ -112,6 +115,8 @@ func (c *Client) ListTorrents(fields []string) error {
 }
 
 func (c *Client) ListFiles(id int, fields []string) error {
+	fields = setAsFirstString(fields, "name")
+
 	request := TorrentGetRequest{}
 	request.Method = TorrentGet.String()
 	request.Arguments.IDs = []int{id}
