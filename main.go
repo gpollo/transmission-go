@@ -58,6 +58,38 @@ func main() {
 		},
 	)
 
+	cmdRenameFile := parser.NewCommand(
+		"rename-file",
+		"Rename a file owned by a torrent",
+	)
+
+	cmdRenameFileID := cmdRenameFile.Int(
+		"i",
+		"id",
+		&argparse.Options{
+			Required: true,
+			Help:     "The ID of the torrent",
+		},
+	)
+
+	cmdRenameFileSrc := cmdRenameFile.String(
+		"s",
+		"src",
+		&argparse.Options{
+			Required: true,
+			Help:     "The source file",
+		},
+	)
+
+	cmdRenameFileDest := cmdRenameFile.String(
+		"d",
+		"dest",
+		&argparse.Options{
+			Required: true,
+			Help:     "The destination file",
+		},
+	)
+
 	if err := parser.Parse(os.Args); err != nil {
 		fmt.Print(parser.Usage(err))
 	}
@@ -81,6 +113,19 @@ func main() {
 
 	if cmdListFiles.Happened() {
 		err := client.ListFiles(*cmdListFilesID, *cmdListFilesFields)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if cmdRenameFile.Happened() {
+		err := client.RenameFile(
+			*cmdRenameFileID,
+			*cmdRenameFileSrc,
+			*cmdRenameFileDest,
+		)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

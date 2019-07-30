@@ -6,11 +6,13 @@ type Method int
 
 const (
 	TorrentGet Method = iota
+	TorrentRenamePath
 )
 
 func (c Method) String() string {
 	return [...]string{
 		"torrent-get",
+		"torrent-rename-path",
 	}[c]
 }
 
@@ -88,5 +90,23 @@ type TorrentGetRequest struct {
 type TorrentGetResponse struct {
 	Arguments struct {
 		Torrents []Torrent `json:"torrents"`
+	} `json:"arguments"`
+}
+
+type TorrentRenamePathRequest struct {
+	Method    string `json:"method"`
+	Arguments struct {
+		ID   int    `json:"ids"`
+		Path string `json:"path"`
+		Name string `json:"name"`
+	} `json:"arguments"`
+}
+
+type TorrentRenamePathResponse struct {
+	Method    string `json:"method"`
+	Arguments struct {
+		ID   int    `json:"id"`
+		Path string `json:"path"`
+		Name string `json:"name"`
 	} `json:"arguments"`
 }
