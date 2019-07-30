@@ -8,6 +8,7 @@ import "bytes"
 import "errors"
 import "os"
 import "regexp"
+import "strings"
 
 const (
 	SessionIDRegex string = "<code>X-Transmission-Session-Id: *(.*)</code>"
@@ -114,6 +115,29 @@ func (c *Client) ListTorrents(fields []string) error {
 	return nil
 }
 
+func (c *Client) GetTorrentName(id int) (string, error) {
+	request := TorrentGetRequest{}
+	request.Method = TorrentGet.String()
+	request.Arguments.IDs = []int{id}
+	request.Arguments.Fields = []string{"name"}
+
+	bytes, err := c.sendRequest(request)
+	if err != nil {
+		return "", err
+	}
+
+	response := TorrentGetResponse{}
+	if err := json.Unmarshal(bytes, &response); err != nil {
+		return "", err
+	}
+
+	if len(response.Arguments.Torrents) != 1 {
+		return "", errors.New("Unexpected number of torrent received")
+	}
+
+	return response.Arguments.Torrents[0].fieldToString("name"), nil
+}
+
 func (c *Client) ListFiles(id int, fields []string) error {
 	fields = setAsFirstString(fields, "name")
 
@@ -132,6 +156,12 @@ func (c *Client) ListFiles(id int, fields []string) error {
 		return err
 	}
 
+	name, err := c.GetTorrentName(id)
+	if err != nil {
+		return err
+	}
+	name = name + "/"
+
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(fields)
 	table.SetBorders(tablewriter.Border{
@@ -147,7 +177,13 @@ func (c *Client) ListFiles(id int, fields []string) error {
 	for _, file := range torrent.Files {
 		row := []string{}
 		for _, field := range fields {
-			row = append(row, file.fieldToString(field))
+			if field == "name" {
+				filename := file.Name
+				filename = strings.TrimPrefix(filename, name)
+				row = append(row, filename)
+			} else {
+				row = append(row, file.fieldToString(field))
+			}
 		}
 		table.Append(row)
 	}
