@@ -6,18 +6,22 @@ import "os"
 
 import "github.com/akamensky/argparse"
 
+const (
+	DefaultRPCEndpoint string = "http://host:9091/transmission/rpc"
+)
+
 func main() {
 	parser := argparse.NewParser(
 		path.Base(os.Args[0]),
 		"Command line interface for transmission RPC",
 	)
 
-	host := parser.String(
-		"",
-		"host",
+	cmdEndpoint := parser.String(
+		"e",
+		"endpoint",
 		&argparse.Options{
 			Required: false,
-			Help:     "Hostname of the transmission RPC daemon",
+			Help:     "The endpoint of the transmission session",
 		},
 	)
 
@@ -102,12 +106,16 @@ func main() {
 		fmt.Print(parser.Usage(err))
 	}
 
-	if *host == "" {
+	client := Client{}
+	client.Endpoint = DefaultRPCEndpoint
 
+	envEndpoint := os.Getenv("TRANSMISSION_ENDPOINT")
+	if envEndpoint != "" {
+		client.Endpoint = envEndpoint
 	}
 
-	client := Client{
-		Endpoint: "http://192.168.0.108:9091/transmission/rpc",
+	if *cmdEndpoint != "" {
+		client.Endpoint = *cmdEndpoint
 	}
 
 	if cmdListTorrents.Happened() {
@@ -140,8 +148,6 @@ func main() {
 		}
 		return
 	}
-
-	fmt.Println(*host)
 
 	return
 }
