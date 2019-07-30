@@ -98,7 +98,7 @@ func (c *Client) TorrentGet(ids []int, fields []string) (TorrentGetResponse, err
 	return response, nil
 }
 
-func (c *Client) TorrentRenamePath(id int, old string, new string) error {
+func (c *Client) TorrentRenamePath(id int, old string, new string) (TorrentRenamePathResponse, error) {
 	request := TorrentRenamePathRequest{}
 	request.Method = TorrentRenamePath.String()
 	request.Arguments.ID = id
@@ -107,15 +107,15 @@ func (c *Client) TorrentRenamePath(id int, old string, new string) error {
 
 	bytes, err := c.sendRequest(request)
 	if err != nil {
-		return err
+		return TorrentRenamePathResponse{}, err
 	}
 
 	response := TorrentRenamePathResponse{}
 	if err := json.Unmarshal(bytes, &response); err != nil {
-		return err
+		return TorrentRenamePathResponse{}, err
 	}
 
-	return nil
+	return response, nil
 }
 
 /* extra calls */

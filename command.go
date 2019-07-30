@@ -121,7 +121,7 @@ func (c *Commands) RenameTorrent(id int, new string) error {
 		return err
 	}
 
-	if err := c.Client.TorrentRenamePath(id, old, new); err != nil {
+	if _, err := c.Client.TorrentRenamePath(id, old, new); err != nil {
 		return err
 	}
 
@@ -134,7 +134,7 @@ func (c *Commands) RenameFile(id int, src string, dest string) error {
 		return err
 	}
 
-	if err := c.Client.TorrentRenamePath(id, name+"/"+src, dest); err != nil {
+	if _, err := c.Client.TorrentRenamePath(id, name+"/"+src, dest); err != nil {
 		return err
 	}
 
