@@ -21,6 +21,8 @@ func main() {
 		},
 	)
 
+	/* `list-torrents` command */
+
 	cmdListTorrents := parser.NewCommand(
 		"list-torrents",
 		"Show the list of torrents",
@@ -34,6 +36,8 @@ func main() {
 			Help:     "The list of fields to show",
 		},
 	)
+
+	/* `list-files` command */
 
 	cmdListFiles := parser.NewCommand(
 		"list-files",
@@ -57,6 +61,8 @@ func main() {
 			Help:     "The list of fields to show",
 		},
 	)
+
+	/* `rename-file` command */
 
 	cmdRenameFile := parser.NewCommand(
 		"rename-file",
@@ -89,6 +95,8 @@ func main() {
 			Help:     "The destination file",
 		},
 	)
+
+	/* arguments parsing */
 
 	if err := parser.Parse(os.Args); err != nil {
 		fmt.Print(parser.Usage(err))
