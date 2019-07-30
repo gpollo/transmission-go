@@ -200,6 +200,31 @@ func (c *Client) ListFiles(id int, fields []string) error {
 	return nil
 }
 
+func (c *Client) RenameTorrent(id int, new string) error {
+	old, err := c.GetTorrentParam(id, "name")
+	if err != nil {
+		return err
+	}
+
+	request := TorrentRenamePathRequest{}
+	request.Method = TorrentRenamePath.String()
+	request.Arguments.ID = id
+	request.Arguments.Path = old
+	request.Arguments.Name = new
+
+	bytes, err := c.sendRequest(request)
+	if err != nil {
+		return err
+	}
+
+	response := TorrentRenamePathResponse{}
+	if err := json.Unmarshal(bytes, &response); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) RenameFile(id int, src string, dest string) error {
 	name, err := c.GetTorrentParam(id, "name")
 	if err != nil {

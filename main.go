@@ -76,6 +76,31 @@ func main() {
 		},
 	)
 
+	/* `rename-torrent` command */
+
+	cmdRenameTorrent := parser.NewCommand(
+		"rename-torrent",
+		"Rename a torrent",
+	)
+
+	cmdRenameTorrentID := cmdRenameTorrent.Int(
+		"i",
+		"id",
+		&argparse.Options{
+			Required: true,
+			Help:     "The ID of the torrent",
+		},
+	)
+
+	cmdRenameTorrentName := cmdRenameTorrent.String(
+		"n",
+		"name",
+		&argparse.Options{
+			Required: true,
+			Help:     "The new name of the torrent",
+		},
+	)
+
 	/* `rename-file` command */
 
 	cmdRenameFile := parser.NewCommand(
@@ -140,6 +165,18 @@ func main() {
 
 	if cmdListFiles.Happened() {
 		err := client.ListFiles(*cmdListFilesID, *cmdListFilesFields)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if cmdRenameTorrent.Happened() {
+		err := client.RenameTorrent(
+			*cmdRenameTorrentID,
+			*cmdRenameTorrentName,
+		)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
