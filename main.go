@@ -25,6 +25,16 @@ func main() {
 		},
 	)
 
+	argNoHeader := parser.Flag(
+		"",
+		"no-header",
+		&argparse.Options{
+			Required: false,
+			Help:     "Don't print table header",
+			Default:  false,
+		},
+	)
+
 	/* `list-torrents` command */
 
 	cmdListTorrents := parser.NewCommand(
@@ -106,8 +116,9 @@ func main() {
 		fmt.Print(parser.Usage(err))
 	}
 
-	client := Client{}
+	client := CreateClient()
 	client.Endpoint = DefaultRPCEndpoint
+	client.NoHeader = *argNoHeader
 
 	envEndpoint := os.Getenv("TRANSMISSION_ENDPOINT")
 	if envEndpoint != "" {

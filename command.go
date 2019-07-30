@@ -17,6 +17,14 @@ const (
 type Client struct {
 	Endpoint  string
 	SessionID string
+	NoHeader  bool
+}
+
+func CreateClient() Client {
+	client := Client{}
+	client.NoHeader = false
+
+	return client
 }
 
 func (c *Client) postRequest(payload []byte) ([]byte, error) {
@@ -76,7 +84,11 @@ func (c *Client) sendRequest(req interface{}) ([]byte, error) {
 
 func (c *Client) printTable(header []string, content [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
+
+	if !c.NoHeader {
+		table.SetHeader(header)
+	}
+
 	table.SetBorders(tablewriter.Border{
 		Left:   false,
 		Top:    false,
