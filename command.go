@@ -133,11 +133,11 @@ func (c *Client) ListTorrents(fields []string) error {
 	return nil
 }
 
-func (c *Client) GetTorrentName(id int) (string, error) {
+func (c *Client) GetTorrentParam(id int, param string) (string, error) {
 	request := TorrentGetRequest{}
 	request.Method = TorrentGet.String()
 	request.Arguments.IDs = []int{id}
-	request.Arguments.Fields = []string{"name"}
+	request.Arguments.Fields = []string{param}
 
 	bytes, err := c.sendRequest(request)
 	if err != nil {
@@ -153,7 +153,7 @@ func (c *Client) GetTorrentName(id int) (string, error) {
 		return "", errors.New("Unexpected number of torrent received")
 	}
 
-	return response.Arguments.Torrents[0].fieldToString("name"), nil
+	return response.Arguments.Torrents[0].fieldToString(param), nil
 }
 
 func (c *Client) ListFiles(id int, fields []string) error {
@@ -174,7 +174,7 @@ func (c *Client) ListFiles(id int, fields []string) error {
 		return err
 	}
 
-	name, err := c.GetTorrentName(id)
+	name, err := c.GetTorrentParam(id, "name")
 	if err != nil {
 		return err
 	}
@@ -201,7 +201,7 @@ func (c *Client) ListFiles(id int, fields []string) error {
 }
 
 func (c *Client) RenameFile(id int, src string, dest string) error {
-	name, err := c.GetTorrentName(id)
+	name, err := c.GetTorrentParam(id, "name")
 	if err != nil {
 		return err
 	}
