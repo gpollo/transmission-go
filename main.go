@@ -141,21 +141,21 @@ func main() {
 		fmt.Print(parser.Usage(err))
 	}
 
-	client := CreateClient()
-	client.Endpoint = DefaultRPCEndpoint
-	client.NoHeader = *argNoHeader
+	commands := CreateCommands()
+	commands.Client.Endpoint = DefaultRPCEndpoint
+	commands.NoHeader = *argNoHeader
 
 	envEndpoint := os.Getenv("TRANSMISSION_ENDPOINT")
 	if envEndpoint != "" {
-		client.Endpoint = envEndpoint
+		commands.Client.Endpoint = envEndpoint
 	}
 
 	if *argEndpoint != "" {
-		client.Endpoint = *argEndpoint
+		commands.Client.Endpoint = *argEndpoint
 	}
 
 	if cmdListTorrents.Happened() {
-		err := client.ListTorrents(*cmdListTorrentsFields)
+		err := commands.ListTorrents(*cmdListTorrentsFields)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -164,7 +164,7 @@ func main() {
 	}
 
 	if cmdListFiles.Happened() {
-		err := client.ListFiles(*cmdListFilesID, *cmdListFilesFields)
+		err := commands.ListFiles(*cmdListFilesID, *cmdListFilesFields)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -173,7 +173,7 @@ func main() {
 	}
 
 	if cmdRenameTorrent.Happened() {
-		err := client.RenameTorrent(
+		err := commands.RenameTorrent(
 			*cmdRenameTorrentID,
 			*cmdRenameTorrentName,
 		)
@@ -185,7 +185,7 @@ func main() {
 	}
 
 	if cmdRenameFile.Happened() {
-		err := client.RenameFile(
+		err := commands.RenameFile(
 			*cmdRenameFileID,
 			*cmdRenameFileSrc,
 			*cmdRenameFileDest,

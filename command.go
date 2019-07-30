@@ -5,7 +5,20 @@ import "os"
 import "strings"
 import "errors"
 
-func (c *Client) printTable(header []string, content [][]string) {
+type Commands struct {
+	Client   Client
+	NoHeader bool
+}
+
+func CreateCommands() Commands {
+	commands := Commands{}
+	commands.Client = CreateClient()
+	commands.NoHeader = false
+
+	return commands
+}
+
+func (c *Commands) printTable(header []string, content [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
 
 	if !c.NoHeader {
@@ -25,11 +38,11 @@ func (c *Client) printTable(header []string, content [][]string) {
 	table.Render()
 }
 
-func (c *Client) ListTorrents(fields []string) error {
+func (c *Commands) ListTorrents(fields []string) error {
 	fields = setAsFirstString(fields, "name")
 	fields = setAsFirstString(fields, "id")
 
-	response, err := c.TorrentGet([]int{}, fields)
+	response, err := c.Client.TorrentGet([]int{}, fields)
 	if err != nil {
 		return err
 	}
@@ -60,15 +73,15 @@ func (c *Client) GetTorrentParam(id int, param string) (string, error) {
 	return response.Arguments.Torrents[0].fieldToString(param), nil
 }
 
-func (c *Client) ListFiles(id int, fields []string) error {
+func (c *Commands) ListFiles(id int, fields []string) error {
 	fields = setAsFirstString(fields, "name")
 
-	response, err := c.TorrentGet([]int{}, []string{"files"})
+	response, err := c.Client.TorrentGet([]int{}, []string{"files"})
 	if err != nil {
 		return err
 	}
 
-	name, err := c.GetTorrentParam(id, "name")
+	name, err := c.Client.GetTorrentParam(id, "name")
 	if err != nil {
 		return err
 	}
@@ -94,26 +107,48 @@ func (c *Client) ListFiles(id int, fields []string) error {
 	return nil
 }
 
-func (c *Client) RenameTorrent(id int, new string) error {
-	old, err := c.GetTorrentParam(id, "name")
+func (c *Commands) ListPeers(id int, fields []string) error {
+	fields = setAsFirstString(fields, "address")
+
+	response, err := c.Client.TorrentGet([]int{id}, []string{"peers"})
 	if err != nil {
 		return err
 	}
 
-	if err := c.TorrentRenamePath(id, old, new); err != nil {
+	content := [][]string{}
+	torrent := response.Arguments.Torrents[0]
+	for _, peer := range torrent.Peers {
+		row := []string{}
+		for _, field := range fields {
+			row = append(row, peer.fieldToString(field))
+		}
+		content = append(content, row)
+	}
+	c.printTable(fields, content)
+
+	return nil
+}
+
+func (c *Commands) RenameTorrent(id int, new string) error {
+	old, err := c.Client.GetTorrentParam(id, "name")
+	if err != nil {
+		return err
+	}
+
+	if err := c.Client.TorrentRenamePath(id, old, new); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c *Client) RenameFile(id int, src string, dest string) error {
-	name, err := c.GetTorrentParam(id, "name")
+func (c *Commands) RenameFile(id int, src string, dest string) error {
+	name, err := c.Client.GetTorrentParam(id, "name")
 	if err != nil {
 		return err
 	}
 
-	if err := c.TorrentRenamePath(id, name+"/"+src, dest); err != nil {
+	if err := c.Client.TorrentRenamePath(id, name+"/"+src, dest); err != nil {
 		return err
 	}
 

@@ -14,12 +14,10 @@ const (
 type Client struct {
 	Endpoint  string
 	SessionID string
-	NoHeader  bool
 }
 
 func CreateClient() Client {
 	client := Client{}
-	client.NoHeader = false
 
 	return client
 }
