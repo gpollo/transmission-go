@@ -42,11 +42,12 @@ type File struct {
 }
 
 func (f *File) fieldToString(field string) string {
-	if field == "bytesCompleted" {
+	switch field {
+	case "bytesCompleted":
 		return strconv.Itoa(f.BytesCompleted)
-	} else if field == "length" {
+	case "length":
 		return strconv.Itoa(f.Length)
-	} else if field == "name" {
+	case "name":
 		return string(f.Name)
 	}
 
@@ -61,10 +62,15 @@ type Torrent struct {
 }
 
 func (t *Torrent) fieldToString(field string) string {
-	if field == "id" {
+	switch field {
+	case "files":
+		return "..."
+	case "id":
 		return strconv.Itoa(t.ID)
-	} else if field == "name" {
-		return string(t.Name)
+	case "name":
+		return t.Name
+	case "peers":
+		return "..."
 	}
 
 	return "..."
