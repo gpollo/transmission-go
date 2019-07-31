@@ -4,12 +4,14 @@ type Method int
 
 const (
 	TorrentGet Method = iota
+	TorrentAdd
 	TorrentRenamePath
 )
 
 func (c Method) String() string {
 	return [...]string{
 		"torrent-get",
+		"torrent-add",
 		"torrent-rename-path",
 	}[c]
 }
@@ -174,6 +176,33 @@ type TorrentGetRequest struct {
 type TorrentGetResponse struct {
 	Arguments struct {
 		Torrents []Torrent `json:"torrents"`
+	} `json:"arguments"`
+}
+
+type TorrentAddRequest struct {
+	Method    string `json:"method"`
+	Arguments struct {
+		Cookies           string   `json:"cookies,omitempty"`
+		DownloadDir       string   `json:"download-dir,omitempty"`
+		Filename          string   `json:"filename,omitempty"`
+		Metainfo          string   `json:"metainfo,omitempty"`
+		Paused            bool     `json:"paused,omitempty"`
+		PeerLimit         uint     `json:"peer-limit,omitempty"`
+		BandwidthPriority uint     `json:"bandwidthPriority,omitempty"`
+		FilesWanted       []string `json:"files-wanted,omitempty"`
+		FilesUnwanted     []string `json:"files-wanted,omitempty"`
+		PriorityHigh      []string `json:"priority-high,omitempty"`
+		PriorityLow       []string `json:"priority-low,omitempty"`
+		PriorityNormal    []string `json:"priority-normal,omitempty"`
+	} `json:"arguments"`
+}
+
+type TorrentAddResponse struct {
+	Method    string `json:"method"`
+	Arguments struct {
+		HashString string `json:"hashString,omitempty"`
+		ID         int    `json:"id,omitempty"`
+		Name       string `json:"name,omitempty"`
 	} `json:"arguments"`
 }
 
