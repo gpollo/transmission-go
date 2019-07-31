@@ -1,7 +1,5 @@
 package main
 
-import "strconv"
-
 type Method int
 
 const (
@@ -41,40 +39,6 @@ type File struct {
 	Name           string `json:"name,omitempty"`
 }
 
-func (f *File) fieldToString(field string) string {
-	switch field {
-	case "bytesCompleted":
-		return strconv.Itoa(f.BytesCompleted)
-	case "length":
-		return strconv.Itoa(f.Length)
-	case "name":
-		return string(f.Name)
-	}
-
-	return "..."
-}
-
-type Torrent struct {
-	Files []File `json:"files,omitempty"`
-	ID    int    `json:"id,omitempty"`
-	Name  string `json:"name,omitempty"`
-	Peers []Peer `json:"peers,omitempty"`
-}
-
-func (t *Torrent) fieldToString(field string) string {
-	switch field {
-	case "files":
-		return "..."
-	case "id":
-		return strconv.Itoa(t.ID)
-	case "name":
-		return t.Name
-	case "peers":
-		return "..."
-	}
-
-	return "..."
-}
 
 type TorrentGetRequest struct {
 	Method    string `json:"method"`
